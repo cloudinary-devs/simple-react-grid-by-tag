@@ -6,8 +6,29 @@ import { face } from '@cloudinary/url-gen/qualifiers/focusOn';
 import { cld } from './cloudinary.config';
 import { useCloudinaryImages } from './hooks/useCloudinaryImages';
 
+// Define the tag used to filter images from Cloudinary
+const CLOUDINARY_TAG = 'mcp1';
+const BANNER_TAG = 'winter-banner';
+
 function App() {
-  const { images, loading, error } = useCloudinaryImages('mcp1');
+  // Fetch images for banner and gallery
+  const { images: bannerImages } = useCloudinaryImages(BANNER_TAG);
+  const { images, loading, error } = useCloudinaryImages(CLOUDINARY_TAG);
+
+  // Determine which image to use for the banner
+  const bannerPublicId = bannerImages && bannerImages.length > 0
+    ? bannerImages[0].public_id
+    : (images && images.length > 0 ? images[0].public_id : null);
+
+  let bannerImg = null;
+  if (bannerPublicId) {
+    bannerImg = cld.image(bannerPublicId);
+    bannerImg.resize(
+      fill()
+        .aspectRatio('4:1')
+        .gravity('auto')
+    ).format('auto').quality('auto');
+  }
 
   if (loading) {
     return (
@@ -35,11 +56,19 @@ function App() {
     <div className="container mx-auto p-4">
       <header className="text-center mb-6">
         <h1 className="text-3xl font-bold mt-4">Winter Collection</h1>
-        <img
-          src="https://placehold.jp/d2d4ea/d2d4ea/300x100.jpg"
-          alt="Placeholder"
-          className="w-full h-auto rounded"
-        />
+        {bannerImg ? (
+          <div className="w-full aspect-[4/1] rounded overflow-hidden">
+            <AdvancedImage
+              cldImg={bannerImg}
+              className="w-full h-full object-cover"
+              alt="Banner"
+            />
+          </div>
+        ) : (
+          <div className="w-full aspect-[4/1] bg-gray-200 rounded flex items-center justify-center">
+            <span className="text-gray-400">No banner image found</span>
+          </div>
+        )}
       </header>
 
       <main>
@@ -47,10 +76,13 @@ function App() {
           {images.map((image) => {
             // Create Cloudinary image instance
             const cloudinaryImage = cld.image(image.public_id);
-            
-            // Apply transformations for consistent display
             cloudinaryImage
-              .resize(fill().width(400).height(400).gravity(focusOn(face())))
+              .resize(
+                fill()
+                  .width(400)
+                  .height(400)
+                  .gravity('auto:face')
+              )
               .format('auto')
               .quality('auto');
 

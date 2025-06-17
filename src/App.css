@@ -10,3 +10,21 @@
 body h2 {
   font-size: 1.5rem;
 }
+
+.banner-image {
+  width: 100%;
+  aspect-ratio: 4 / 1;
+  object-fit: cover;
+  display: block;
+}
+
+.banner-placeholder {
+  width: 100%;
+  aspect-ratio: 4 / 1;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 1.2rem;
+}
